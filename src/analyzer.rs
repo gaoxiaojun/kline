@@ -25,17 +25,17 @@ impl Analyzer {
         }
     }
 
+    pub fn get_bars(&self) -> &Vec<Bar> {
+        &self.bars
+    }
+
     pub fn get_candles(&self) -> &Vec<Candle> {
         &self.candle_list
     }
 
-    pub fn get_fxs(&self)-> &Vec<Fx> {
+    pub fn get_fxs(&self) -> &Vec<Fx> {
         &self.fx_list
     }
-    
-    fn update_candle(&mut self) {}
-
-    fn update_fx(&mut self) {}
 
     fn update_bi_list(&mut self) {}
 
@@ -48,14 +48,18 @@ impl Analyzer {
     }
     // 检查是否为顶底分型
     fn check_fractal(&self) -> Option<Fx> {
-        let _1 = self.candle_list.len() - 1;
-        let _2 = self.candle_list.len() - 2;
-        let _3 = self.candle_list.len() - 3;
-        let k1 = &self.candle_list[_3];
-        let k2 = &self.candle_list[_2];
-        let k3 = &self.candle_list[_1];
+        if self.candle_list.len() >= 3 {
+            let _1 = self.candle_list.len() - 1;
+            let _2 = self.candle_list.len() - 2;
+            let _3 = self.candle_list.len() - 3;
+            let k1 = &self.candle_list[_3];
+            let k2 = &self.candle_list[_2];
+            let k3 = &self.candle_list[_1];
 
-        Fx::check_fractal(k1, k2, k3)
+            Fx::check_fractal(k1, k2, k3)
+        } else {
+            None
+        }
     }
 
     // 处理与当前bar的包含关系
@@ -75,23 +79,15 @@ impl Analyzer {
         Candle::merge(direction, current, bar)
     }
 
-    pub fn on_new_bar(&mut self, bar: &Bar) -> bool {
-        self.bars.push(bar.clone());
+    fn update_candle_fx(&mut self, bar: &Bar) -> bool {
         let wlen = self.candle_list.len();
         match wlen {
-            0 | 1 => self.add_candle(&bar),
-            2 => {
-                let merged = self.process_contain_relationship(bar);
-                if !merged {
-                    self.add_candle(&bar);
-                }
-            }
-
+            0 | 1 => self.add_candle(bar),
             _ => {
                 let merged = self.process_contain_relationship(bar);
                 if !merged {
                     let result = self.check_fractal();
-                    self.add_candle(&bar);
+                    self.add_candle(bar);
                     if let Some(f) = result {
                         self.fx_list.push(f);
                         return true;
@@ -100,5 +96,10 @@ impl Analyzer {
             }
         }
         false
+    }
+
+    pub fn on_new_bar(&mut self, bar: &Bar) -> bool {
+        self.bars.push(bar.clone());
+        self.update_candle_fx(bar)
     }
 }

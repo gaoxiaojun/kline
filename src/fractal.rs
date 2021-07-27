@@ -35,13 +35,12 @@ fn has_gap(k1: &Bar, k2: &Bar, min_gap: f64) -> bool {
 
 fn has_gap2(k1: &Bar, k2: &Bar) -> bool {
     assert!(k1.time < k2.time);
-    if k1.high < k2.low  || k2.high < k1.low  {
+    if k1.high < k2.low || k2.high < k1.low {
         true
     } else {
         false
     }
 }
-
 
 impl Fractal {
     pub fn new(k1: Candle, k2: Candle, k3: Candle) -> Self {
@@ -178,7 +177,7 @@ pub struct Fx {
     pub end: Time,
     pub high: f64,
     pub low: f64,
-    pub index:u64,
+    pub index: u64,
 }
 
 impl Fx {
@@ -190,7 +189,7 @@ impl Fx {
         end: Time,
         high: f64,
         low: f64,
-        index:u64
+        index: u64,
     ) -> Self {
         Self {
             time,
@@ -200,13 +199,13 @@ impl Fx {
             end,
             high,
             low,
-            index
+            index,
         }
     }
     pub fn is_same_type(&self, other: &Fx) -> bool {
         self.fx_mark == other.fx_mark
     }
-    pub fn has_enough_distance(&self, rhs:&Fx) -> bool{
+    pub fn has_enough_distance(&self, rhs: &Fx) -> bool {
         self.distance(rhs) >= 4
     }
     fn get_low(k1: &Candle, k2: &Candle, k3: &Candle, gap1: bool, gap3: bool) -> f64 {
@@ -261,7 +260,7 @@ impl Fx {
                 k3.bar.time,
                 high,
                 low,
-                k2.index
+                k2.index,
             )
         } else {
             let low = k2.bar.low;
@@ -274,16 +273,16 @@ impl Fx {
                 k3.bar.time,
                 high,
                 low,
-                k2.index
+                k2.index,
             )
         };
         fx
     }
 
-    pub fn distance(&self, rhs:&Fx) -> u64 {
+    pub fn distance(&self, rhs: &Fx) -> u64 {
         if self.index > rhs.index {
             self.index - rhs.index
-        }else {
+        } else {
             rhs.index - self.index
         }
     }
