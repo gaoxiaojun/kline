@@ -20,7 +20,7 @@ impl Candle {
     pub(crate) fn new(index: u64, time: Time, open: f64, high: f64, low: f64, close: f64, vol:f64) -> Self {
         Self {
             index,
-            bar: Bar::new(time, open, high, low, close, vol),
+            bar: Bar::new(time, open, high, low, close,vol),
         }
     }
 
@@ -124,7 +124,7 @@ impl Candle {
                     current.bar.low = f64::min(bar.low, current.bar.low);
                     current.bar.open = current.bar.high;
                     current.bar.close = current.bar.low;
-                    current.bar.vol += current.bar.vol;
+                    //current.bar.vol += current.bar.vol;
                 }
 
                 Direction::Up => {
@@ -141,7 +141,7 @@ impl Candle {
                     current.bar.low = f64::max(bar.low, current.bar.low);
                     current.bar.close = current.bar.high;
                     current.bar.open = current.bar.low;
-                    current.bar.vol += current.bar.vol;
+                    //current.bar.vol += current.bar.vol;
                 }
             }
             //current.bar.close = bar.close;

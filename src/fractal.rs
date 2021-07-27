@@ -1,6 +1,5 @@
 use crate::bar::Bar;
 use crate::{candle::Candle, time::Time};
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FractalType {
     Top,

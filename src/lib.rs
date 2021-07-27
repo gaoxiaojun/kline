@@ -5,3 +5,4 @@ pub mod analyzer;
 pub mod candle;
 pub mod ringbuffer;
 pub mod fractal;
+pub mod fractal_detector;

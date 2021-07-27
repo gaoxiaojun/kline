@@ -41,9 +41,13 @@ impl Analyzer {
     fn update_xd_list(&mut self) {}
 
     fn add_candle(&mut self, bar: &Bar) {
+        if self.window.len() > 0 {
+            let last = self.window.get(-1).unwrap();
+            self.candles.push(last.clone());
+        }
+
         let c = Candle::from_bar(self.next_index, bar);
         self.next_index += 1;
-        self.candles.push(c.clone());
         self.window.push(c);
     }
     // 检查是否为顶底分型
