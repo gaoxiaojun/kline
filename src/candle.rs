@@ -51,6 +51,7 @@ impl Candle {
 
     // 检测并处理包含关系
     // 返回值: true:存在包含关系， false:没有包含关系
+    // 一字板的处理会影响Candle的数量，暂时用merge函数取代
     pub fn merge_old(direction: Direction, current: &mut Candle, bar: &Bar) -> bool {
         // current,bar是否有包含关系
         if (current.bar.high >= bar.high && current.bar.low <= bar.low)

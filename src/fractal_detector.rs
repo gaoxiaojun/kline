@@ -70,7 +70,7 @@ impl FractalDetector {
 
         let current = self.window.get_mut(-1).unwrap();
 
-        Candle::merge(direction, current, bar)
+        Candle::merge_old(direction, current, bar)
     }
 
     // 处理K线包含关系，更新内部缓冲区，检测分型

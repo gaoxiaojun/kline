@@ -6,32 +6,33 @@ use crate::ringbuffer::RingBuffer;
 #[derive(Debug)]
 pub struct Analyzer {
     bars: Vec<Bar>,
-    candles: Vec<Candle>,
+    candle_list: Vec<Candle>,
     next_index: u64,
     fx_list: Vec<Fx>,
     bi_list: Vec<Fx>,
     xd_list: Vec<Fx>,
-    //
-    window: RingBuffer<Candle>,
 }
 
 impl Analyzer {
     pub fn new() -> Self {
         Self {
             bars: Vec::new(),
-            candles: Vec::new(),
+            candle_list: Vec::new(),
             fx_list: Vec::new(),
             next_index: 0,
             bi_list: Vec::new(),
             xd_list: Vec::new(),
-            window: RingBuffer::new(3),
         }
     }
 
     pub fn get_candles(&self) -> &Vec<Candle> {
-        &self.candles
+        &self.candle_list
     }
 
+    pub fn get_fxs(&self)-> &Vec<Fx> {
+        &self.fx_list
+    }
+    
     fn update_candle(&mut self) {}
 
     fn update_fx(&mut self) {}
@@ -41,20 +42,18 @@ impl Analyzer {
     fn update_xd_list(&mut self) {}
 
     fn add_candle(&mut self, bar: &Bar) {
-        if self.window.len() > 0 {
-            let last = self.window.get(-1).unwrap();
-            self.candles.push(last.clone());
-        }
-
         let c = Candle::from_bar(self.next_index, bar);
         self.next_index += 1;
-        self.window.push(c);
+        self.candle_list.push(c);
     }
     // 检查是否为顶底分型
     fn check_fractal(&self) -> Option<Fx> {
-        let k1 = self.window.get(-3).unwrap();
-        let k2 = self.window.get(-2).unwrap();
-        let k3 = self.window.get(-1).unwrap();
+        let _1 = self.candle_list.len() - 1;
+        let _2 = self.candle_list.len() - 2;
+        let _3 = self.candle_list.len() - 3;
+        let k1 = &self.candle_list[_3];
+        let k2 = &self.candle_list[_2];
+        let k3 = &self.candle_list[_1];
 
         Fx::check_fractal(k1, k2, k3)
     }
@@ -62,20 +61,23 @@ impl Analyzer {
     // 处理与当前bar的包含关系
     fn process_contain_relationship(&mut self, bar: &Bar) -> bool {
         // 队列中有至少两个经过包含处理的Candle
-        debug_assert!(self.window.len() >= 2);
+        debug_assert!(self.candle_list.len() >= 2);
+        let _1 = self.candle_list.len() - 1;
+        let _2 = self.candle_list.len() - 2;
         let direction = {
-            let k1 = self.window.get(-2).unwrap();
-            let k2 = self.window.get(-1).unwrap();
+            let k1 = &self.candle_list[_2];
+            let k2 = &self.candle_list[_1];
             Candle::check_direction(k1, k2)
         };
 
-        let current = self.window.get_mut(-1).unwrap();
+        let current = &mut self.candle_list[_1];
 
         Candle::merge(direction, current, bar)
     }
-    pub fn on_new_bar(&mut self, bar: &Bar) -> Option<Fx> {
+
+    pub fn on_new_bar(&mut self, bar: &Bar) -> bool {
         self.bars.push(bar.clone());
-        let wlen = self.window.len();
+        let wlen = self.candle_list.len();
         match wlen {
             0 | 1 => self.add_candle(&bar),
             2 => {
@@ -90,10 +92,13 @@ impl Analyzer {
                 if !merged {
                     let result = self.check_fractal();
                     self.add_candle(&bar);
-                    return result;
+                    if let Some(f) = result {
+                        self.fx_list.push(f);
+                        return true;
+                    }
                 }
             }
         }
-        None
+        false
     }
 }
