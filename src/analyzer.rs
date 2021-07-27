@@ -37,9 +37,13 @@ impl Analyzer {
         &self.fx_list
     }
 
-    fn update_bi_list(&mut self) {}
+    fn update_bi_list(&mut self) -> bool{
+        false
+    }
 
-    fn update_xd_list(&mut self) {}
+    fn update_xd_list(&mut self) ->bool{
+        false
+    }
 
     fn add_candle(&mut self, bar: &Bar) {
         let c = Candle::from_bar(self.next_index, bar);
@@ -98,8 +102,18 @@ impl Analyzer {
         false
     }
 
-    pub fn on_new_bar(&mut self, bar: &Bar) -> bool {
+    pub fn on_new_bar(&mut self, bar: &Bar) {
         self.bars.push(bar.clone());
-        self.update_candle_fx(bar)
+        let has_new_fx = self.update_candle_fx(bar);
+        let has_new_pen = if has_new_fx {
+            self.update_bi_list()
+        }else {
+            false
+        };
+        let has_new_xd = if has_new_pen {
+            self.update_xd_list()
+        }else {
+            false
+        };
     }
 }
