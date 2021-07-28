@@ -1,17 +1,13 @@
 #[macro_use]
 extern crate manifest_dir_macros;
 
-use kline::{
-    analyzer::Analyzer,
-    bar::Bar,
-    fractal_detector::FractalDetector,
-    time::timestamp_to_utc,
-    util::{load_bar_from_csv, load_fx_from_csv},
-};
+use kline::{analyzer::Analyzer, bar::Bar, candle::Candle, time::timestamp_to_utc, util::*, plot::*};
 
 const EU_DATA: &str = path!("data", "EU_2021.csv");
 const EU_CANDLE: &str = path!("data", "candle_list.csv");
 const EU_FX: &str = path!("data", "fx_list.csv");
+const EU_BI: &str = path!("data", "bi_list.csv");
+const DUMP_BI: &str = path!("data", "dump_bi.csv");
 
 fn load_bar_csv(filename: &str) -> Vec<Bar> {
     let bars = load_bar_from_csv(filename).unwrap();
@@ -71,6 +67,51 @@ fn compare_fx(analyzer: &Analyzer) {
     println!("Compare Fx Successful");
 }
 
+fn dump_bi(analyzer: &Analyzer) {
+    let bis = analyzer.get_bis();
+    println!("Bi Count: {}   dump to: {}", bis.len(), DUMP_BI);
+    let _ = dump_bi_to_csv(DUMP_BI, bis);
+}
+
+fn compare_bi(analyzer: &Analyzer) {
+    // compare fractals
+    let bis = load_bi_from_csv(EU_BI).unwrap();
+    let parsed_bi = analyzer.get_bis();
+    println!(
+        "Bi Count: {} Parsed_bi count: {}",
+        bis.len(),
+        parsed_bi.len()
+    );
+
+    assert!(bis.len() == parsed_bi.len());
+
+    for i in 0..bis.len() {
+        let lhs = &bis[i];
+        let rhs = &parsed_bi[i];
+        assert!(
+            lhs.time == rhs.time
+                && lhs.fx_mark == rhs.fx_mark
+                && lhs.high == rhs.high
+                && lhs.low == rhs.low
+        );
+    }
+
+    println!("Compare Bi Successful");
+}
+
+fn draw(analyzer: &Analyzer, bar_or_candle:bool) {
+    let mut bars :Vec<Bar> = Vec::new();
+    if bar_or_candle {
+        for bar in analyzer.get_bars() {
+            bars.push(bar.clone());
+        }
+    }else {
+        for c in analyzer.get_candles() {
+            bars.push(c.bar.clone());
+        }
+    };
+    draw_bar_tradingview(&bars, analyzer.get_bis(), analyzer.get_xd());
+}
 fn main() {
     // load bar data
     let bars = load_bar_csv(EU_DATA);
@@ -84,4 +125,9 @@ fn main() {
     comapre_candle(&analyzer);
 
     compare_fx(&analyzer);
+
+    dump_bi(&analyzer);
+
+    draw(&analyzer, false);
+    //compare_bi(&analyzer);
 }

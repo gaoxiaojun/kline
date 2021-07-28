@@ -6,3 +6,4 @@ pub mod candle;
 pub mod ringbuffer;
 pub mod fractal;
 pub mod fractal_detector;
+pub mod plot;
