@@ -1,10 +1,14 @@
 use crate::bar::Bar;
 use crate::fractal::{Fx, FractalType};
-use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
 use std::vec::Vec;
 use std::{env, fs::File};
+use std::error::Error;
+use serde::Serialize;
+use std::io::prelude::*;
+use manifest_dir_macros::path;
+use crate::util::*;
 
 const DEFAULT_HTML_APP_NOT_FOUND: &str = "Could not find default application for HTML files.";
 
@@ -84,14 +88,29 @@ fn render_bars_tradingview(
     buf
 }
 
-pub fn draw_bar_tradingview(bars: &Vec<Bar>, pens: &Vec<Fx>, segments: &Vec<Fx>) {
+const INDEX_HTML_TEMPLATE: &str = path!("plot", "index_chart.html");
+#[derive(Serialize)]
+struct Context {
+    prefix: String,
+}
+
+pub fn read_template(prefix:String)->Result<String, Box<dyn Error>>{
+    let mut contents = read_file_content(INDEX_HTML_TEMPLATE).unwrap();
+    let offset = contents.find("</script>").unwrap();
+    contents.insert_str(offset + 9, &format!(r#"<script src="./{}-chart-data.json"></script>"#, prefix));
+    let title_offset = contents.find("</title>").unwrap();
+    contents.insert_str(title_offset, &prefix);
+    Ok(contents)
+}
+
+pub fn draw_bar_tradingview(prefix:String, bars: &Vec<Bar>, pens: &Vec<Fx>, segments: &Vec<Fx>) ->Result<(), Box<dyn Error>>{
+    
     let rendered = render_bars_tradingview(bars, pens, segments);
     let rendered = rendered.as_bytes();
-    let mut temp = env::temp_dir();
-    let mut src = templates_root_path();
+    let mut temp = cargo_path(Some("temp"));
 
     // write data.json
-    temp.push("chart-data.json");
+    temp.push(format!("{}-{}", prefix, "chart-data.json"));
     let temp_path = temp.to_str().unwrap();
     {
         let mut file = File::create(temp_path).unwrap();
@@ -99,16 +118,23 @@ pub fn draw_bar_tradingview(bars: &Vec<Bar>, pens: &Vec<Fx>, segments: &Vec<Fx>)
             .expect("failed to write html output");
         file.flush().unwrap();
     }
-    println!("{}", temp.display());
     temp.pop();
 
     // copy index.html
-    temp.push("index_tradingview.html");
-    src.push("index_chart.html");
-    std::fs::copy(src.as_path(), temp.as_path()).expect("failed to copy index.html");
-
+    temp.push(format!("index_{}.html", prefix));
+    let content = read_template(prefix).unwrap();
+    let temp_path = temp.to_str().unwrap();
+    {
+        let mut file = File::create(temp_path).unwrap();
+        file.write_all(content.as_bytes())
+            .expect("failed to write html output");
+        file.flush().unwrap();
+    }
+    println!("write to {}", temp_path);
     // display in browser
     show_with_default_app(temp.to_str().unwrap());
+    temp.pop();
+    Ok(())
 }
 
 #[cfg(target_os = "linux")]

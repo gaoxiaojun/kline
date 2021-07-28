@@ -7,3 +7,5 @@ pub mod ringbuffer;
 pub mod fractal;
 pub mod fractal_detector;
 pub mod plot;
+pub mod pen;
+pub mod pen_detector;

@@ -1,5 +1,8 @@
 use crate::bar::Bar;
 use crate::{candle::Candle, time::Time};
+use std::fmt;
+use crate::time::*;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FractalType {
     Top,
@@ -168,7 +171,7 @@ impl PartialEq for Fractal {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Fx {
     pub time: Time,
     pub fx_mark: FractalType,
@@ -308,6 +311,37 @@ impl Fx {
         } else {
             false
         }
+    }
+}
+
+impl fmt::Display for Fx {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let time_str = time_to_str(self.time);
+        let mark_str = if self.fx_mark == FractalType::Top {
+            "顶"
+        }else {
+            "低"
+        };
+        write!(f, "time:{}, type:{}, price: {}, high:{}, low{}", time_str, mark_str, self.price, self.high, self.low)
+    }
+}
+
+impl fmt::Debug for Fx {
+    fn fmt(&self, f: &mut fmt::Formatter) -> std::fmt::Result {
+        let time_str = time_to_str(self.time);
+        let mark_str = if self.fx_mark == FractalType::Top {
+            "顶"
+        }else {
+            "低"
+        };
+        f.debug_struct("Fx")
+            .field("time", &time_str)
+            .field("mark", &mark_str)
+            .field("price", &self.price)
+            .field("high", &self.high)
+            .field("low", &self.low)
+            .finish()
     }
 }
 

@@ -12,3 +12,4 @@ Cargo.lock
 .vscode/
 .idea/
 plot/chart-data.json
+temp/

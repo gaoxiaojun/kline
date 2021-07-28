@@ -1,6 +1,7 @@
 use crate::bar::Bar;
 use crate::candle::Candle;
 use crate::fractal::{FractalType,Fx};
+use crate::pen_detector::*;
 
 #[derive(Debug)]
 pub struct Analyzer {
@@ -10,6 +11,7 @@ pub struct Analyzer {
     fx_list: Vec<Fx>,
     bi_list: Vec<Fx>,
     xd_list: Vec<Fx>,
+    pd: PenDetector,
 }
 
 impl Analyzer {
@@ -21,6 +23,7 @@ impl Analyzer {
             next_index: 0,
             bi_list: Vec::new(),
             xd_list: Vec::new(),
+            pd: PenDetector::new()
         }
     }
 
@@ -44,6 +47,62 @@ impl Analyzer {
         &self.xd_list
     }
 
+    fn find_first_bi(&mut self) -> bool {
+        debug_assert!(self.bi_list.len() < 2);
+        let _1 = self.fx_list.len() -1;
+        let _2 = self.fx_list.len() -2;
+ 
+        let prev = &self.fx_list[_2];
+        let next = &self.fx_list[_1];
+        if prev.is_contain(next) {
+            return false;
+        }
+        let has_enough_distance = prev.has_enough_distance(next);
+        let prev_price_higher = if prev.price > next.price {
+            true
+        }else {
+            false
+        };
+
+        match (prev.fx_mark, next.fx_mark, has_enough_distance, prev_price_higher) {
+            (FractalType::Top, FractalType::Bottom, true, true) => { 
+                // 前顶后底 and 距离足够 and 前高后低 => 新的下降笔
+                if self.bi_list.len() < 1 {
+                    self.bi_list.push(prev.clone());
+                }
+                self.bi_list.push(next.clone());
+            },
+
+            (FractalType::Bottom, FractalType::Top, true, false) => { 
+                // 前底后顶 and 距离足够 and 前低后高 => 新的上升笔
+                if self.bi_list.len() < 1 {
+                    self.bi_list.push(prev.clone());
+                }
+                self.bi_list.push(next.clone());
+            },
+
+            (FractalType::Top, FractalType::Bottom, _, false) => { 
+                // 前顶后顶 and 前低后高 => 上升笔延伸
+                if self.bi_list.len() > 1 {
+                    self.bi_list.pop();
+                    self.bi_list.push(next.clone());
+                }
+            },
+
+            (FractalType::Bottom, FractalType::Top, _, true) => { 
+                // 前底后底 and 前高后低 => 下降笔延伸
+                if self.bi_list.len() > 1 {
+                    self.bi_list.pop();
+                    self.bi_list.push(next.clone());
+                }
+            },
+            (_,_,_,_) => {
+
+            }
+        }
+
+        false
+    }
     fn update_bi_list(&mut self) -> bool{
         if self.fx_list.len() < 2 {
             return false;
@@ -66,7 +125,7 @@ impl Analyzer {
 
         match (prev.fx_mark, next.fx_mark, has_enough_distance, prev_price_higher) {
             (FractalType::Top, FractalType::Bottom, true, true) => { 
-                // 前顶后低 and 距离足够 and 前高后低 => 新的下降笔
+                // 前顶后底 and 距离足够 and 前高后低 => 新的下降笔
                 if self.bi_list.len() < 1 {
                     self.bi_list.push(prev.clone());
                 }
@@ -166,11 +225,34 @@ impl Analyzer {
         false
     }
 
+    pub fn update_pen_list(&mut self, f: Fx) -> bool{
+        let event = self.pd.on_new_fractal(f);
+            if let Some(pen_event) = event {
+                match pen_event {
+                    PenEvent::First(a, b) => {
+                        self.bi_list.push(a);
+                        self.bi_list.push(b);
+                        return true;
+                    }
+                    PenEvent::New(a) => {
+                        self.bi_list.push(a);
+                        return true;
+                    }
+
+                    PenEvent::UpdateTo(a) => {
+                        self.bi_list.pop();
+                        self.bi_list.push(a);
+                    }
+                }
+            }
+        false
+    }
+    
     pub fn on_new_bar(&mut self, bar: &Bar) {
         self.bars.push(bar.clone());
         let has_new_fx = self.update_candle_fx(bar);
         let has_new_pen = if has_new_fx {
-            self.update_bi_list()
+            self.update_pen_list(self.fx_list.last().unwrap().clone())
         }else {
             false
         };

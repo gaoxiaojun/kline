@@ -9,6 +9,13 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 use std::vec::Vec;
 
+pub fn read_file_content(filename: &str)-> std::io::Result<String> {
+    let mut file = File::open(filename)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    Ok(contents)
+}
+
 pub fn load_bar_from_csv(filename: &str) -> std::io::Result<Vec<Bar>> {
     let mut file = File::open(filename)?;
     let mut contents = String::new();
@@ -136,11 +143,17 @@ pub fn dump_bi_to_csv(filename: &str, bis: &Vec<Fx>) -> Result<(), Box<dyn Error
     Ok(())
 }
 
-
-fn cargo_path(join_path:Option<String>) -> PathBuf {
+pub fn cargo_path(join_path:Option<&str>) -> PathBuf {
     let mut path = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
      if join_path.is_some() {
       path = path.join(join_path.unwrap())
     }
     path
+}
+
+pub fn write_content_to_file(filename:&str, contents: &str) -> std::io::Result<()> {
+    let mut file = File::create(filename)?;
+    file.write_all(contents.as_bytes())?;
+    file.flush()?;
+    Ok(())
 }
