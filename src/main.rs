@@ -99,9 +99,10 @@ fn compare_bi(analyzer: &Analyzer) {
     println!("Compare Bi Successful");
 }
 
-fn draw(analyzer: &Analyzer, bar_or_candle:bool) {
+fn draw(analyzer: &Analyzer, bar_or_candle:&str) {
     let mut bars :Vec<Bar> = Vec::new();
-    if bar_or_candle {
+    let is_bar = bar_or_candle == "bar";
+    if is_bar {
         for bar in analyzer.get_bars() {
             bars.push(bar.clone());
         }
@@ -122,12 +123,12 @@ fn main() {
         analyzer.on_new_bar(bar);
     }
 
-    comapre_candle(&analyzer);
+    //comapre_candle(&analyzer);
 
-    compare_fx(&analyzer);
+    //compare_fx(&analyzer);
 
-    dump_bi(&analyzer);
+    //dump_bi(&analyzer);
 
-    draw(&analyzer, false);
+    draw(&analyzer, "bar");
     //compare_bi(&analyzer);
 }

@@ -118,14 +118,14 @@ impl Candle {
                     //    return true;
                     //}
 
-                    //if current.bar.low > bar.low {
+                    if current.bar.low > bar.low {
                         current.bar.time = bar.time;
-                    //}
+                    }
                     current.bar.high = f64::min(bar.high, current.bar.high);
                     current.bar.low = f64::min(bar.low, current.bar.low);
                     current.bar.open = current.bar.high;
                     current.bar.close = current.bar.low;
-                    //current.bar.vol += current.bar.vol;
+                    current.bar.vol += current.bar.vol;
                 }
 
                 Direction::Up => {
@@ -135,17 +135,17 @@ impl Candle {
                     //    return true;
                     //}
 
-                    //if current.bar.high < bar.high {
+                    if current.bar.high < bar.high {
                         current.bar.time = bar.time;
-                    //}
+                    }
                     current.bar.high = f64::max(bar.high, current.bar.high);
                     current.bar.low = f64::max(bar.low, current.bar.low);
                     current.bar.close = current.bar.high;
                     current.bar.open = current.bar.low;
-                    //current.bar.vol += current.bar.vol;
+                    current.bar.vol += current.bar.vol;
                 }
             }
-            //current.bar.close = bar.close;
+            current.bar.close = bar.close;
             true
         } else {
             false

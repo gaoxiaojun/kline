@@ -2,9 +2,11 @@ use crate::bar::Bar;
 use crate::fractal::{FractalType, Fx};
 use crate::time::*;
 use chrono::{DateTime, NaiveDateTime, Utc};
+use std::env;
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
+use std::path::PathBuf;
 use std::vec::Vec;
 
 pub fn load_bar_from_csv(filename: &str) -> std::io::Result<Vec<Bar>> {
@@ -132,4 +134,13 @@ pub fn dump_bi_to_csv(filename: &str, bis: &Vec<Fx>) -> Result<(), Box<dyn Error
     }
     wtr.flush()?;
     Ok(())
+}
+
+
+fn cargo_path(join_path:Option<String>) -> PathBuf {
+    let mut path = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+     if join_path.is_some() {
+      path = path.join(join_path.unwrap())
+    }
+    path
 }
