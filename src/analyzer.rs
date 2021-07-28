@@ -1,7 +1,7 @@
 use crate::bar::Bar;
 use crate::candle::Candle;
 use crate::fractal::{FractalType,Fx};
-use crate::pen_detector::*;
+use crate::pd::*;
 
 #[derive(Debug)]
 pub struct Analyzer {

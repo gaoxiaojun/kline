@@ -160,9 +160,11 @@ fn main() {
     //dump_bi(&analyzer);
 
     //compare_bi(&analyzer);
+    println!("analyzer_bi_list count = {}", analyzer.get_bis().len());
     draw(&analyzer, "bar", "bar");
     draw(&analyzer, "candle", "candle");
     let bis = load_bi_from_csv(EU_BI).unwrap();
+    println!("json_bi_list count = {}", bis.len());
     draw_bi(&analyzer, "bar", "bi", &bis);
 
     //let s = read_template("candle".to_string()).unwrap();
