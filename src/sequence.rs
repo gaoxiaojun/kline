@@ -4,7 +4,7 @@ use crate::pen::Pen;
 // 向上的线段采用向上合并, 向下的特征序列，找顶分型
 // 向下的线段采用向下合并, 向上的特征序列，找底分型
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Seq {
     pub from: Point,
     pub to: Point

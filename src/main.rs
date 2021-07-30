@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate manifest_dir_macros;
 
-use kline::{analyzer::Analyzer, bar::Bar, candle::Candle, fx::Fx, plot::*, time::timestamp_to_utc, util::*};
+use kline::{analyzer::Analyzer, bar::Bar, candle::Candle, fractal::Fractal, plot::*, time::*, util::*};
 
 const EU_DATA: &str = path!("data", "EU_2021.csv");
 const EU_CANDLE: &str = path!("data", "candle_list.csv");
@@ -21,6 +21,7 @@ fn load_bar_csv(filename: &str) -> Vec<Bar> {
     bars
 }
 
+/* 
 fn comapre_candle(analyzer: &Analyzer) {
     // compare candles
     let candles = load_bar_csv(EU_CANDLE);
@@ -41,6 +42,7 @@ fn comapre_candle(analyzer: &Analyzer) {
     }
     println!("Compare Candle Successful");
 }
+
 
 fn compare_fx(analyzer: &Analyzer) {
     // compare fractals
@@ -99,19 +101,14 @@ fn compare_bi(analyzer: &Analyzer) {
 
     println!("Compare Bi Successful");
 }
-
-fn draw(analyzer: &Analyzer, bar_or_candle: &str, prefix:&str) {
+*/
+fn draw(analyzer: &Analyzer, prefix:&str) {
     let mut bars: Vec<Bar> = Vec::new();
-    let is_bar = bar_or_candle == "bar";
-    if is_bar {
+    
         for bar in analyzer.get_bars() {
             bars.push(bar.clone());
         }
-    } else {
-        for c in analyzer.get_candles() {
-            bars.push(c.bar.clone());
-        }
-    };
+    
     let _ = draw_bar_tradingview(
         prefix.to_string(),
         &bars,
@@ -120,18 +117,13 @@ fn draw(analyzer: &Analyzer, bar_or_candle: &str, prefix:&str) {
     );
 }
 
-fn draw_bi(analyzer: &Analyzer, bar_or_candle: &str, prefix:&str, bi: &Vec<Fx>){
+fn draw_bi(analyzer: &Analyzer, prefix:&str, bi: &Vec<Fractal>){
     let mut bars: Vec<Bar> = Vec::new();
-    let is_bar = bar_or_candle == "bar";
-    if is_bar {
+   
         for bar in analyzer.get_bars() {
             bars.push(bar.clone());
         }
-    } else {
-        for c in analyzer.get_candles() {
-            bars.push(c.bar.clone());
-        }
-    };
+    
     let _ = draw_bar_tradingview(
         prefix.to_string(),
         &bars,
@@ -158,10 +150,9 @@ fn main() {
 
     //compare_bi(&analyzer);
     println!("analyzer_bi_list count = {}", analyzer.get_bis().len());
-    draw(&analyzer, "bar", "bar");
-    draw(&analyzer, "candle", "candle");
-    let bis = load_bi_from_csv(EU_BI).unwrap();
-    println!("json_bi_list count = {}", bis.len());
+    draw(&analyzer, "bar");
+    //let bis = load_bi_from_csv(EU_BI).unwrap();
+    //println!("json_bi_list count = {}", bis.len());
     //draw_bi(&analyzer, "bar", "bi", &bis);
 
     //let s = read_template("candle".to_string()).unwrap();

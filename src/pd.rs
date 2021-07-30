@@ -1,12 +1,12 @@
-use crate::fx::Fx;
+use crate::fractal::Fractal;
 use crate::ringbuffer::RingBuffer;
 use crate::pen_rule::{self, MergeAction};
 
 #[derive(Debug, Clone)]
 pub enum PenEvent {
-    First(Fx, Fx),
-    New(Fx),
-    UpdateTo(Fx),
+    First(Fractal, Fractal),
+    New(Fractal),
+    UpdateTo(Fractal),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -18,7 +18,7 @@ pub enum PenDirection {
 // TODO:考虑一种特殊情况就是顶分型高点相等或者底分型低点相等
 #[derive(Debug)]
 pub struct PenDetector {
-    window: RingBuffer<Fx>,
+    window: RingBuffer<Fractal>,
     has_pen: bool,
 }
 
@@ -46,13 +46,13 @@ impl PenDetector {
         self._is_pen(0)
     }
 
-    fn state0(&mut self, f: Fx) -> Option<PenEvent> {
+    fn state0(&mut self, f: Fractal) -> Option<PenEvent> {
         debug_assert!(self.window.len() == 0 && !self.has_pen);
         self.window.push(f);
         None
     }
 
-    fn state1(&mut self, f: Fx) -> Option<PenEvent> {
+    fn state1(&mut self, f: Fractal) -> Option<PenEvent> {
         debug_assert!(self.window.len() == 1 && !self.has_pen);
         let last = self.window.get(-1).unwrap();
         if last.is_same_type(&f) {
@@ -77,7 +77,7 @@ impl PenDetector {
         None
     }
 
-    fn state2(&mut self, f: Fx) -> Option<PenEvent> {
+    fn state2(&mut self, f: Fractal) -> Option<PenEvent> {
         debug_assert!(!self.ab_is_pen());
         debug_assert!(!self.has_pen);
         debug_assert!(self.window.len() == 2);
@@ -126,7 +126,7 @@ impl PenDetector {
         None
     }
 
-    fn state3(&mut self, f: Fx) -> Option<PenEvent> {
+    fn state3(&mut self, f: Fractal) -> Option<PenEvent> {
         debug_assert!(self.ab_is_pen());
         debug_assert!(self.has_pen);
         debug_assert!(self.window.len() == 2);
@@ -160,7 +160,7 @@ impl PenDetector {
         None
     }
 
-    fn state4(&mut self, f: Fx) -> Option<PenEvent> {
+    fn state4(&mut self, f: Fractal) -> Option<PenEvent> {
         debug_assert!(self.ab_is_pen());
         debug_assert!(!self
             .window
@@ -206,7 +206,7 @@ impl PenDetector {
         None
     }
 
-    pub fn on_new_fractal(&mut self, f: Fx) -> Option<PenEvent> {
+    pub fn on_new_fractal(&mut self, f: Fractal) -> Option<PenEvent> {
         let len = self.window.len();
         let is_pen = self.has_pen;
 

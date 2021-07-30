@@ -1,6 +1,6 @@
 use crate::bar::Bar;
 use crate::candle::Candle;
-use crate::fractal::Fx;
+use crate::fractal::Fractal;
 use crate::ringbuffer::RingBuffer;
 
 
@@ -34,13 +34,13 @@ impl FractalDetectorWithoutCandleList {
     }
 
     // 检查是否为顶底分型
-    fn check_fractal(&self) -> Option<Fx> {
-        if self.candle_list.len() >= 3 {
+    fn check_fractal(&self) -> Option<Fractal> {
+        if self.window.len() >= 3 {
             let k1 = self.window.get(-3).unwrap();
             let k2 = self.window.get(-2).unwrap();
             let k3 = self.window.get(-1).unwrap();
 
-            Fx::check_fractal(k1, k2, k3)
+            Fractal::check_fractal(k1, k2, k3)
         } else {
             None
         }
@@ -58,11 +58,11 @@ impl FractalDetectorWithoutCandleList {
 
         let current = self.window.get_mut(-1).unwrap();
 
-        Candle::merge_old(direction, current, bar)
+        Candle::merge(direction, current, bar)
     }
 
     // 处理K线包含关系，更新内部缓冲区，检测分型
-    pub fn on_new_bar(&mut self, bar: &Bar) -> Option<Fx> {
+    pub fn on_new_bar(&mut self, bar: &Bar) -> Option<Fractal> {
         let len = self.window.len();
         debug_assert!(len <= 3);
 

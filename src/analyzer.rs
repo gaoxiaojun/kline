@@ -1,7 +1,7 @@
 use crate::bar::Bar;
 use crate::candle::Candle;
-use crate::fdc::FractalDetector;
-use crate::fx::Fx;
+use crate::fd::FractalDetectorWithoutCandleList;
+use crate::fractal::Fractal;
 use crate::pd::*;
 use crate::pen::Pen;
 use crate::segment::Segment;
@@ -11,11 +11,11 @@ use crate::segment::Segment;
 pub struct Analyzer {
     bars: Vec<Bar>,
     next_index: u64,
-    fx_list: Vec<Fx>,
-    bi_list: Vec<Fx>,
-    xd_list: Vec<Fx>,
+    fx_list: Vec<Fractal>,
+    bi_list: Vec<Fractal>,
+    xd_list: Vec<Fractal>,
     pd: PenDetector,
-    fd: FractalDetector,
+    fd: FractalDetectorWithoutCandleList,
 }
 
 impl Analyzer {
@@ -27,7 +27,7 @@ impl Analyzer {
             bi_list: Vec::new(),
             xd_list: Vec::new(),
             pd: PenDetector::new(),
-            fd: FractalDetector::new(),
+            fd: FractalDetectorWithoutCandleList::new(),
         }
     }
 
@@ -35,19 +35,19 @@ impl Analyzer {
         &self.bars
     }
 
-    pub fn get_candles(&self) -> &Vec<Candle> {
+    /*pub fn get_candles(&self) -> &Vec<Candle> {
         self.fd.get_candles()
-    }
+    }*/
 
-    pub fn get_fxs(&self) -> &Vec<Fx> {
+    pub fn get_fxs(&self) -> &Vec<Fractal> {
         &self.fx_list
     }
 
-    pub fn get_bis(&self) -> &Vec<Fx> {
+    pub fn get_bis(&self) -> &Vec<Fractal> {
         &self.bi_list
     }
 
-    pub fn get_xd(&self) -> &Vec<Fx> {
+    pub fn get_xd(&self) -> &Vec<Fractal> {
         &self.xd_list
     }
 
@@ -60,7 +60,7 @@ impl Analyzer {
         None
     }
 
-    pub fn on_new_fx(&mut self, f: Fx) -> bool {
+    pub fn on_new_fx(&mut self, f: Fractal) -> bool {
         let event = self.pd.on_new_fractal(f);
             if let Some(pen_event) = event {
                 match pen_event {

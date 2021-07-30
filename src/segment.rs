@@ -1,4 +1,4 @@
-use crate::fx::{FractalType, Fx};
+use crate::fractal::{FractalType, Fractal};
 use crate::time::Time;
 use crate::pen::Pen;
 use crate::point::Point;

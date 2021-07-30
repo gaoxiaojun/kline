@@ -1,6 +1,6 @@
 use crate::bar::Bar;
 use crate::candle::Candle;
-use crate::fx::{FractalType, Fx};
+use crate::fractal::{FractalType, Fractal};
 use crate::time::*;
 use chrono::{DateTime, NaiveDateTime, Utc};
 use std::env;
@@ -49,6 +49,7 @@ fn load_csv_from_str(csv: &str) -> Vec<Bar> {
     bars
 }
 
+/* 
 pub fn load_fx_from_csv(filename: &str) -> std::io::Result<Vec<Fx>> {
     let mut file = File::open(filename)?;
     let mut contents = String::new();
@@ -56,9 +57,9 @@ pub fn load_fx_from_csv(filename: &str) -> std::io::Result<Vec<Fx>> {
     Ok(load_fx_from_str(contents.as_str()))
 }
 
-
-fn load_fx_from_str(csv: &str) -> Vec<Fx> {
-    let mut fxs: Vec<Fx> = Vec::new();
+ 
+fn load_fx_from_str(csv: &str) -> Vec<Fractal> {
+    let mut fxs: Vec<Fractal> = Vec::new();
     let mut reader = csv::ReaderBuilder::new()
         .has_headers(true)
         .from_reader(csv.as_bytes());
@@ -78,16 +79,16 @@ fn load_fx_from_str(csv: &str) -> Vec<Fx> {
         let fx_high = AsRef::<str>::as_ref(&record[5]).parse::<f64>().unwrap();
         let fx_low = AsRef::<str>::as_ref(&record[6]).parse::<f64>().unwrap();
         let fx = if fx_mark == FractalType::Top {
-            Fx::new(time, fx_mark, fx, start_dt, end_dt, fx, fx_low, fx_high, fx_low, index)
+            Fractal::new(time, fx_mark, fx, start_dt, end_dt, fx, fx_low, fx_high, fx_low, index)
         }else {
-            Fx::new(time, fx_mark, fx, start_dt, end_dt, fx_high, fx,fx_high, fx_low, index)
+            Fractal::new(time, fx_mark, fx, start_dt, end_dt, fx_high, fx,fx_high, fx_low, index)
         };
         index += 1;
         fxs.push(fx);
     }
     fxs
-}
-
+}*/
+/* 
 pub fn load_bi_from_csv(filename: &str) -> std::io::Result<Vec<Fx>> {
     let mut file = File::open(filename)?;
     let mut contents = String::new();
@@ -126,7 +127,8 @@ fn load_bi_from_str(csv: &str) -> Vec<Fx> {
     fxs
 }
 
-pub fn dump_bi_to_csv(filename: &str, bis: &Vec<Fx>) -> Result<(), Box<dyn Error>> {
+
+pub fn dump_bi_to_csv(filename: &str, bis: &Vec<Fractal>) -> Result<(), Box<dyn Error>> {
     let file = File::create(filename)?;
     let mut wtr = csv::Writer::from_writer(file);
     // write header
@@ -137,7 +139,7 @@ pub fn dump_bi_to_csv(filename: &str, bis: &Vec<Fx>) -> Result<(), Box<dyn Error
         let dt_str = time_to_str(record.time);
         let start_str = time_to_str(record.start);
         let end_str = time_to_str(record.end);
-        let mark_str = if record.fx_mark == FractalType::Top {
+        let mark_str = if record.fractal_type() == FractalType::Top {
             "g".to_string()
         } else {
             "d".to_string()
@@ -152,8 +154,8 @@ pub fn dump_bi_to_csv(filename: &str, bis: &Vec<Fx>) -> Result<(), Box<dyn Error
     wtr.flush()?;
     Ok(())
 }
-
-pub fn dump_fx_to_csv(filename: &str, fxs: &Vec<Fx>) -> Result<(), Box<dyn Error>> {
+*/
+pub fn dump_fx_to_csv(filename: &str, fxs: &Vec<Fractal>) -> Result<(), Box<dyn Error>> {
     let file = File::create(filename)?;
     let mut wtr = csv::Writer::from_writer(file);
     // write header
@@ -161,15 +163,15 @@ pub fn dump_fx_to_csv(filename: &str, fxs: &Vec<Fx>) -> Result<(), Box<dyn Error
         "datetime", "type","price","high", "low"
     ])?;
     for record in fxs {
-        let dt_str = time_to_str(record.time);
-        let mark_str = if record.fx_mark == FractalType::Top {
+        let dt_str = time_to_str(record.time());
+        let mark_str = if record.fractal_type() == FractalType::Top {
             "Top".to_string()
         } else {
             "Bottom".to_string()
         };
-        let price_str = format!("{}", record.price);
-        let high_str = format!("{}", record.high);
-        let low_str = format!("{}", record.low);
+        let price_str = format!("{}", record.price());
+        let high_str = format!("{}", record.high());
+        let low_str = format!("{}", record.low());
         wtr.write_record(&[
             dt_str, mark_str, price_str, high_str, low_str,
         ])?;

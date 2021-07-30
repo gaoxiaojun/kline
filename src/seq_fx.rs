@@ -3,12 +3,18 @@ use crate::sequence::Seq;
 
 #[derive(Debug, Clone)]
 pub struct SeqFx {
-
+    pub s1: Seq,
+    pub s2: Seq,
+    pub s3: Seq
 }
 
 impl SeqFx {
     pub fn build_seq_fx(s1: &Seq, s2:&Seq, s3: &Seq) -> Self {
-        Self {}
+        Self {
+            s1:s1.clone(),
+            s2:s2.clone(),
+            s3:s3.clone()
+        }
     }
 
     // 检查分型

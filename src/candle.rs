@@ -33,6 +33,14 @@ impl Candle {
         }
     }
 
+    pub(crate) fn high(&self) -> f64 {
+        return self.bar.high
+    }
+
+    pub(crate) fn low(&self) -> f64 {
+        return self.bar.low
+    }
+
     pub(crate) fn from_bar(index: u64, bar: &Bar) -> Self {
         Self {
             index,

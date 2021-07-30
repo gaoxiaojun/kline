@@ -1,5 +1,5 @@
 use crate::bar::Bar;
-use crate::fx::{Fx, FractalType};
+use crate::fractal::{Fractal, FractalType};
 use std::path::PathBuf;
 use std::process::Command;
 use std::vec::Vec;
@@ -29,19 +29,19 @@ fn render_bar_tradingview(bar: &Bar) -> String {
     )
 }
 
-fn render_fractal_tradingview(f: &Fx) -> String {
-    let price = if f.fx_mark == FractalType::Top {
-        f.high
+fn render_fractal_tradingview(f: &Fractal) -> String {
+    let price = if f.fractal_type() == FractalType::Top {
+        f.high()
     } else {
-        f.low
+        f.low()
     };
-    format!("{{ time:{}, value: {} }}", f.time / 1000, price)
+    format!("{{ time:{}, value: {} }}", f.time() / 1000, price)
 }
 
 fn render_bars_tradingview(
     bars: &Vec<Bar>,
-    pens: &Vec<Fx>,
-    segments: &Vec<Fx>,
+    pens: &Vec<Fractal>,
+    segments: &Vec<Fractal>,
 ) -> String {
     let mut buf = String::new();
     let header = "Data ={ \n";
@@ -103,7 +103,7 @@ pub fn read_template(prefix:String)->Result<String, Box<dyn Error>>{
     Ok(contents)
 }
 
-pub fn draw_bar_tradingview(prefix:String, bars: &Vec<Bar>, pens: &Vec<Fx>, segments: &Vec<Fx>) ->Result<(), Box<dyn Error>>{
+pub fn draw_bar_tradingview(prefix:String, bars: &Vec<Bar>, pens: &Vec<Fractal>, segments: &Vec<Fractal>) ->Result<(), Box<dyn Error>>{
     
     let rendered = render_bars_tradingview(bars, pens, segments);
     let rendered = rendered.as_bytes();
