@@ -2,7 +2,7 @@
 extern crate manifest_dir_macros;
 
 use kline::{
-    analyzer::Analyzer, bar::Bar, candle::Candle, plot::*, time::timestamp_to_utc, util::*,fractal::Fx
+    analyzer::Analyzer, bar::Bar, candle::Candle, plot::*, time::timestamp_to_utc, util::*,fx::Fx
 };
 use std::thread::sleep;
 use std::time::Duration;
@@ -165,7 +165,7 @@ fn main() {
     draw(&analyzer, "candle", "candle");
     let bis = load_bi_from_csv(EU_BI).unwrap();
     println!("json_bi_list count = {}", bis.len());
-    draw_bi(&analyzer, "bar", "bi", &bis);
+    //draw_bi(&analyzer, "bar", "bi", &bis);
 
     //let s = read_template("candle".to_string()).unwrap();
     //println!("index.html\n{}", s);

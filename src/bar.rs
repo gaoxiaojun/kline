@@ -8,18 +8,18 @@ pub struct Bar {
     pub high: f64,
     pub low: f64,
     pub close: f64,
-    pub vol:f64,
+    pub vol: f64,
 }
 
 impl Bar {
-    pub fn new(time: Time, open: f64, high: f64, low: f64, close: f64, vol:f64) -> Self {
+    pub fn new(time: Time, open: f64, high: f64, low: f64, close: f64, vol: f64) -> Self {
         Self {
             time,
             open,
             high,
             low,
             close,
-            vol
+            vol,
         }
     }
 }

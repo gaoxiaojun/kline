@@ -1,5 +1,5 @@
 use crate::bar::Bar;
-use crate::fractal::{FractalType, Fx};
+use crate::fx::{FractalType, Fx};
 use crate::time::*;
 use chrono::{DateTime, NaiveDateTime, Utc};
 use std::env;
@@ -55,6 +55,7 @@ pub fn load_fx_from_csv(filename: &str) -> std::io::Result<Vec<Fx>> {
     Ok(load_fx_from_str(contents.as_str()))
 }
 
+
 fn load_fx_from_str(csv: &str) -> Vec<Fx> {
     let mut fxs: Vec<Fx> = Vec::new();
     let mut reader = csv::ReaderBuilder::new()
@@ -75,7 +76,11 @@ fn load_fx_from_str(csv: &str) -> Vec<Fx> {
         let end_dt = parse_time(AsRef::<str>::as_ref(&record[4]));
         let fx_high = AsRef::<str>::as_ref(&record[5]).parse::<f64>().unwrap();
         let fx_low = AsRef::<str>::as_ref(&record[6]).parse::<f64>().unwrap();
-        let fx = Fx::new(time, fx_mark, fx, start_dt, end_dt, fx_high, fx_low, index);
+        let fx = if fx_mark == FractalType::Top {
+            Fx::new(time, fx_mark, fx, start_dt, end_dt, fx, fx_low, fx_high, fx_low, index)
+        }else {
+            Fx::new(time, fx_mark, fx, start_dt, end_dt, fx_high, fx,fx_high, fx_low, index)
+        };
         index += 1;
         fxs.push(fx);
     }
@@ -109,7 +114,11 @@ fn load_bi_from_str(csv: &str) -> Vec<Fx> {
         let end_dt = parse_time(AsRef::<str>::as_ref(&record[3]));
         let fx_high = AsRef::<str>::as_ref(&record[4]).parse::<f64>().unwrap();
         let fx_low = AsRef::<str>::as_ref(&record[5]).parse::<f64>().unwrap();
-        let fx = Fx::new(time, fx_mark, fx, start_dt, end_dt, fx_high, fx_low, index);
+        let fx = if fx_mark == FractalType::Top {
+            Fx::new(time, fx_mark, fx, start_dt, end_dt, fx, fx_low, fx_high, fx_low, index)
+        }else {
+            Fx::new(time, fx_mark, fx, start_dt, end_dt, fx_high, fx,fx_high, fx_low, index)
+        };
         index += 1;
         fxs.push(fx);
     }

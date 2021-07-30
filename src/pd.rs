@@ -1,6 +1,6 @@
-use crate::fractal::{Fx, FractalType};
+use crate::fx::Fx;
 use crate::ringbuffer::RingBuffer;
-use crate::pen::{self, MergeAction};
+use crate::pen_rule::{self, MergeAction};
 
 // 一、寻找第一笔
 // state 0
@@ -109,7 +109,7 @@ impl PenDetector {
 
     fn _is_pen(&self, start_index: usize) -> bool {
         debug_assert!(self.window.len() >= 2 + start_index);
-        pen::detect_is_pen(
+        pen_rule::detect_is_pen(
             self.window.get(start_index as isize).unwrap(),
             self.window.get((start_index + 1) as isize).unwrap(),
         )
@@ -134,7 +134,7 @@ impl PenDetector {
         let last = self.window.get(-1).unwrap();
         if last.is_same_type(&f) {
             // 1.1
-            let action = pen::merge_same_fx_type(last, &f);
+            let action = pen_rule::merge_same_fx_type(last, &f);
             if action == MergeAction::Replace {
                 self.window.pop_back();
                 self.window.push(f);
@@ -160,7 +160,7 @@ impl PenDetector {
         debug_assert!(self.window.len() == 2);
 
         let b = self.window.get(-1).unwrap();
-        let bc_is_pen = pen::detect_is_pen(b, &f);
+        let bc_is_pen = pen_rule::detect_is_pen(b, &f);
         if bc_is_pen {
             // 2.1
             self.window.push(f);
@@ -174,7 +174,7 @@ impl PenDetector {
             // 2.2
             if b.is_same_type(&f) {
                 // 2.2.1
-                let action = pen::merge_same_fx_type(b, &f);
+                let action = pen_rule::merge_same_fx_type(b, &f);
                 if action == MergeAction::Replace {
                     // 2.2.1.1
                     self.window.pop_back(); // pop b
@@ -192,7 +192,7 @@ impl PenDetector {
             } else {
                 // 2.2.2
                 let a = self.window.get(0).unwrap();
-                let action = pen::merge_same_fx_type(a, &f);
+                let action = pen_rule::merge_same_fx_type(a, &f);
                 if action == MergeAction::Replace {
                     // 2.2.2.2
                     self.window.clear();
@@ -209,7 +209,7 @@ impl PenDetector {
         debug_assert!(self.window.len() == 2);
 
         let b = self.window.get(-1).unwrap();
-        let bc_is_pen = pen::detect_is_pen(b, &f);
+        let bc_is_pen = pen_rule::detect_is_pen(b, &f);
         if bc_is_pen {
             // 3.1
             let c = f.clone();
@@ -219,7 +219,7 @@ impl PenDetector {
             return Some(PenEvent::New(c));
         } else {
             if b.is_same_type(&f) {
-                let action = pen::merge_same_fx_type(b, &f);
+                let action = pen_rule::merge_same_fx_type(b, &f);
                 if action == MergeAction::Replace {
                     // 3.2.2.1
                     self.window.pop_back();
@@ -244,7 +244,7 @@ impl PenDetector {
             .get(-2)
             .unwrap()
             .is_same_type(self.window.get(-1).unwrap()));
-        debug_assert!(!pen::detect_is_pen(
+        debug_assert!(!pen_rule::detect_is_pen(
             self.window.get(-2).unwrap(),
             self.window.get(-1).unwrap()
         ));
@@ -254,7 +254,7 @@ impl PenDetector {
         let c = self.window.get(-1).unwrap();
         if c.is_same_type(&f) {
             // 4.1
-            let action = pen::merge_same_fx_type(c, &f);
+            let action = pen_rule::merge_same_fx_type(c, &f);
             if action == MergeAction::Replace {
                 // 4.1.1
                 self.window.pop_back();
@@ -269,7 +269,7 @@ impl PenDetector {
             // 4.2
             //self.window.pop_back();
             let b = self.window.get(-2).unwrap();
-            let action = pen::merge_same_fx_type(b, &f);
+            let action = pen_rule::merge_same_fx_type(b, &f);
             if action == MergeAction::Replace {
                 // 4.2.2
                 self.window.pop_back();

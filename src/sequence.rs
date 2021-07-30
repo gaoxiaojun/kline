@@ -1,16 +1,13 @@
-use crate::time::Time;
+use crate::point::Point;
+use crate::pen::Pen;
 
-// 向上的线段采用向上合并
-// 向下的线段采用向下合并
+// 向上的线段采用向上合并, 向下的特征序列，找顶分型
+// 向下的线段采用向下合并, 向上的特征序列，找底分型
 
 #[derive(Debug)]
 pub struct Seq {
-    from_index: usize,
-    from_time: Time,
-    from_price: f64,
-    to_index: usize,
-    to_time: Time,
-    to_price: f64,
+    pub from: Point,
+    pub to: Point
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -21,90 +18,74 @@ pub enum MergeDirection {
 
 impl Seq {
     pub fn new(
-        from_index: usize,
-        from_time: Time,
-        from_price: f64,
-        to_index: usize,
-        to_time: Time,
-        to_price: f64,
+        from:Point,
+        to:Point,
     ) -> Self {
         Self {
-            from_index,
-            from_time,
-            from_price,
-            to_index,
-            to_time,
-            to_price,
+            from, to
         }
     }
 
-    pub fn from_index(&self) -> usize {
-        self.from_index
+    pub fn from_pen(p: &Pen) -> Self {
+        Self {
+            from: p.from,
+            to: p.to
+        }
     }
 
-    pub fn to_index(&self) -> usize {
-        self.to_index
+    pub fn start(&self) -> Point {
+        self.from
     }
 
-    pub fn start(&self) -> (Time, f64) {
-        (self.from_time, self.from_price)
-    }
-
-    pub fn end(&self) -> (Time, f64) {
-        (self.to_time, self.to_price)
+    pub fn end(&self) -> Point {
+        self.to
     }
 
     pub fn high(&self) -> f64 {
-        if self.from_price > self.to_price {
-            self.from_price
+        if self.from.price > self.to.price {
+            self.from.price
         } else {
-            self.to_price
+            self.to.price
         }
     }
 
     pub fn low(&self) -> f64 {
-        if self.from_price < self.to_price {
-            self.from_price
+        if self.from.price < self.to.price {
+            self.from.price
         } else {
-            self.to_price
+            self.to.price
         }
     }
 
     pub fn merge_up(&mut self, rhs: &Seq) {
-        let lhs_length = self.to_price - self.from_price;
-        let rhs_length = self.to_price - self.from_price;
+        let lhs_length = self.to.price - self.from.price;
+        let rhs_length = self.to.price - self.from.price;
         let is_same =
             (lhs_length < 0.0 && rhs_length < 0.0) || (lhs_length > 0.0 && rhs_length > 0.0);
 
-        let is_large = (lhs_length.abs() - rhs_length.abs()) > 0.0;
+        let is_larger = (lhs_length.abs() - rhs_length.abs()) > 0.0;
 
-        match (is_large, is_same) {
+        match (is_larger, is_same) {
             (false, true) => {
-                self.from_time = self.to_time;
-                self.from_price = self.to_price;
-                self.to_time = rhs.from_time;
-                self.to_price = rhs.from_price;
+                self.from = self.to;
+                self.to = rhs.from;
             }
             (false, false) => {
-                self.to_time = rhs.from_time;
-                self.to_price = rhs.from_price;
+                self.to = rhs.from;
             }
             (true, true) => {
-                self.to_time = rhs.to_time;
-                self.to_price = rhs.to_price;
+                self.to = rhs.to;
             }
             (true, false) => {
-                self.from_time = self.to_time;
-                self.from_price = self.to_price;
-                self.to_time = rhs.to_time;
-                self.to_price = rhs.to_price;
+                self.from = self.to;
+                self.to = rhs.to;
             }
         }
     }
 
     pub fn merge_down(&mut self, rhs: &Seq) {
-        let lhs_length = self.to_price - self.from_price;
-        let rhs_length = self.to_price - self.from_price;
+        let lhs_length = self.to.price - self.from.price;
+        let rhs_length = self.to.price - self.from.price;
         let is_same =
             (lhs_length < 0.0 && rhs_length < 0.0) || (lhs_length > 0.0 && rhs_length > 0.0);
 
@@ -112,58 +93,36 @@ impl Seq {
 
         match (is_large, is_same) {
             (false, true) => {
-                self.from_time = self.to_time;
-                self.from_price = self.to_price;
-                self.to_time = rhs.from_time;
-                self.to_price = rhs.from_price;
+                self.from = self.to;
+                self.to = rhs.from;
             }
             (false, false) => {
-                self.to_time = rhs.from_time;
-                self.to_price = rhs.from_price;
+                self.to = rhs.from;
             }
             (true, true) => {
-                self.to_time = rhs.to_time;
-                self.to_price = rhs.to_price;
+                self.to = rhs.to;
             }
             (true, false) => {
-                self.from_time = self.to_time;
-                self.from_price = self.to_price;
-                self.to_time = rhs.to_time;
-                self.to_price = rhs.to_price;
+                self.from = self.to;
+                self.to = rhs.to;
             }
         }
     }
 
-    pub fn merge(&mut self, rhs: &Seq, dir: MergeDirection) -> bool {
-        let is_contain_1 = self.high() < rhs.high() && self.low() > rhs.low();
-        let is_contain_2 = self.high() > rhs.high() && self.low() < rhs.low();
+    pub fn merge(lhs: &mut Seq, rhs: &Seq, direction: MergeDirection) -> bool {
+        let is_contain_1 = lhs.high() < rhs.high() && lhs.low() > rhs.low();
+        let is_contain_2 = lhs.high() > rhs.high() && lhs.low() < rhs.low();
         let is_contain = is_contain_1 || is_contain_2;
 
         if !is_contain {
             return false;
         }
 
-        match dir {
-            MergeDirection::Up => self.merge_up(rhs),
-            MergeDirection::Down => self.merge_down(rhs),
+        match direction {
+            MergeDirection::Up => lhs.merge_up(rhs),
+            MergeDirection::Down => lhs.merge_down(rhs),
         }
 
         true
-    }
-
-    pub fn is_top_fractal(s1: &Seq, s2: &Seq, s3: &Seq) -> bool {
-        if s1.high() < s2.high() && s2.high() > s3.high() {
-            true
-        } else {
-            false
-        }
-    }
-
-    pub fn is_bottom_fractal(s1: &Seq, s2: &Seq, s3: &Seq) -> bool {
-        if s1.low() > s2.low() && s2.low() > s3.low() {
-            true
-        } else {
-            false
-        }
     }
 }

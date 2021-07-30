@@ -1,5 +1,5 @@
 use crate::bar::Bar;
-use crate::fractal::{Fx, FractalType};
+use crate::fx::{Fx, FractalType};
 use std::path::PathBuf;
 use std::process::Command;
 use std::vec::Vec;
