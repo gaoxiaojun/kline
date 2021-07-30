@@ -1,7 +1,7 @@
 
 use crate::sequence::Seq;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SeqFx {
 
 }

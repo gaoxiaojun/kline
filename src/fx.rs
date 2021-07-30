@@ -48,6 +48,10 @@ impl Fx {
             index,
         }
     }
+
+    pub fn r#type(&self) -> FractalType {
+        self.fx_mark
+    }
     
     pub fn is_same_type(&self, other: &Fx) -> bool {
         self.fx_mark == other.fx_mark

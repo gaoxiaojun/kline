@@ -1,8 +1,8 @@
 use crate::fx::{FractalType, Fx};
 // 集中笔规则处理
 pub fn detect_is_pen(f1: &Fx, f2: &Fx) -> bool {
-    if f1.fx_mark == FractalType::Top
-        && f2.fx_mark == FractalType::Bottom
+    if f1.r#type() == FractalType::Top
+        && f2.r#type() == FractalType::Bottom
         && f1.has_enough_distance(f2)
         && f2.price < f1.price
         && !fx_is_contain(f1,f2)
@@ -10,8 +10,8 @@ pub fn detect_is_pen(f1: &Fx, f2: &Fx) -> bool {
         return true;
     }
 
-    if f1.fx_mark == FractalType::Bottom
-        && f2.fx_mark == FractalType::Top
+    if f1.r#type() == FractalType::Bottom
+        && f2.r#type() == FractalType::Top
         && f1.has_enough_distance(f2)
         && f2.price > f1.price
         && !fx_is_contain(f1,f2)

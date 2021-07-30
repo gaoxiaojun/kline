@@ -1,11 +1,7 @@
 #[macro_use]
 extern crate manifest_dir_macros;
 
-use kline::{
-    analyzer::Analyzer, bar::Bar, candle::Candle, plot::*, time::timestamp_to_utc, util::*,fx::Fx
-};
-use std::thread::sleep;
-use std::time::Duration;
+use kline::{analyzer::Analyzer, bar::Bar, candle::Candle, fx::Fx, plot::*, time::timestamp_to_utc, util::*};
 
 const EU_DATA: &str = path!("data", "EU_2021.csv");
 const EU_CANDLE: &str = path!("data", "candle_list.csv");
@@ -40,6 +36,7 @@ fn comapre_candle(analyzer: &Analyzer) {
     for i in 0..candles.len() {
         let lhs = &candles[i];
         let rhs = &parsed_candle[i].bar;
+        println!("lhs: {:?} rhs: {:?}", lhs, rhs);
         assert!(lhs.time == rhs.time && lhs.high == rhs.high && lhs.low == rhs.low);
     }
     println!("Compare Candle Successful");

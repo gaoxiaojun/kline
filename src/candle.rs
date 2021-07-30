@@ -18,7 +18,6 @@ pub struct Candle {
 }
 
 impl Candle {
-    #[allow(dead_code)]
     pub(crate) fn new(
         index: u64,
         time: Time,
@@ -39,14 +38,6 @@ impl Candle {
             index,
             bar: bar.clone(),
         }
-    }
-
-    pub fn high(&self) -> f64 {
-        self.bar.high
-    }
-
-    pub fn low(&self) -> f64 {
-        self.bar.low
     }
 
     // 检测包含方向

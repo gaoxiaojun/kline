@@ -91,7 +91,8 @@ impl Analyzer {
         if new_fx.is_none() {
             return;
         }
-    
+
+        //self.fx_list.push(new_fx.clone().unwrap());
         self.on_new_fx(new_fx.unwrap());   
     }
 }

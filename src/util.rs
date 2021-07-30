@@ -1,4 +1,5 @@
 use crate::bar::Bar;
+use crate::candle::Candle;
 use crate::fx::{FractalType, Fx};
 use crate::time::*;
 use chrono::{DateTime, NaiveDateTime, Utc};
@@ -146,6 +147,53 @@ pub fn dump_bi_to_csv(filename: &str, bis: &Vec<Fx>) -> Result<(), Box<dyn Error
         let low_str = format!("{}", record.low);
         wtr.write_record(&[
             dt_str, mark_str, price_str, start_str, end_str, high_str, low_str,
+        ])?;
+    }
+    wtr.flush()?;
+    Ok(())
+}
+
+pub fn dump_fx_to_csv(filename: &str, fxs: &Vec<Fx>) -> Result<(), Box<dyn Error>> {
+    let file = File::create(filename)?;
+    let mut wtr = csv::Writer::from_writer(file);
+    // write header
+    wtr.write_record(&[
+        "datetime", "type","price","high", "low"
+    ])?;
+    for record in fxs {
+        let dt_str = time_to_str(record.time);
+        let mark_str = if record.fx_mark == FractalType::Top {
+            "Top".to_string()
+        } else {
+            "Bottom".to_string()
+        };
+        let price_str = format!("{}", record.price);
+        let high_str = format!("{}", record.high);
+        let low_str = format!("{}", record.low);
+        wtr.write_record(&[
+            dt_str, mark_str, price_str, high_str, low_str,
+        ])?;
+    }
+    wtr.flush()?;
+    Ok(())
+}
+
+pub fn dump_candle_to_csv(filename: &str, candles: &Vec<Candle>) -> Result<(), Box<dyn Error>> {
+    let file = File::create(filename)?;
+    let mut wtr = csv::Writer::from_writer(file);
+    // write header
+    wtr.write_record(&[
+        "datatime","open","high","low","close","volume"
+    ])?;
+    for record in candles {
+        let dt_str = time_to_str(record.bar.time);
+        let open_str = format!("{}", record.bar.open);
+        let high_str = format!("{}", record.bar.high);
+        let low_str = format!("{}", record.bar.low);
+        let close_str = format!("{}", record.bar.close);
+        let vol_str = format!("{}", record.bar.vol);
+        wtr.write_record(&[
+            dt_str, open_str, high_str, low_str,close_str, vol_str
         ])?;
     }
     wtr.flush()?;

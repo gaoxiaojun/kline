@@ -10,12 +10,6 @@ pub struct Seq {
     pub to: Point
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum MergeDirection {
-    Up,
-    Down,
-}
-
 impl Seq {
     pub fn new(
         from:Point,
@@ -57,7 +51,10 @@ impl Seq {
         }
     }
 
-    pub fn merge_up(&mut self, rhs: &Seq) {
+    // 向上线段(向下特征序列，找顶分型)需要向上合并
+    // 向下线段(向上特征序列，找底分型)需要向下合并
+    // 下列代码同时适用于向上合并和向下合并
+    pub fn merge_up_down(&mut self, rhs: &Seq) {
         let lhs_length = self.to.price - self.from.price;
         let rhs_length = self.to.price - self.from.price;
         let is_same =
@@ -83,33 +80,7 @@ impl Seq {
         }
     }
 
-    pub fn merge_down(&mut self, rhs: &Seq) {
-        let lhs_length = self.to.price - self.from.price;
-        let rhs_length = self.to.price - self.from.price;
-        let is_same =
-            (lhs_length < 0.0 && rhs_length < 0.0) || (lhs_length > 0.0 && rhs_length > 0.0);
-
-        let is_large = (lhs_length.abs() - rhs_length.abs()) > 0.0;
-
-        match (is_large, is_same) {
-            (false, true) => {
-                self.from = self.to;
-                self.to = rhs.from;
-            }
-            (false, false) => {
-                self.to = rhs.from;
-            }
-            (true, true) => {
-                self.to = rhs.to;
-            }
-            (true, false) => {
-                self.from = self.to;
-                self.to = rhs.to;
-            }
-        }
-    }
-
-    pub fn merge(lhs: &mut Seq, rhs: &Seq, direction: MergeDirection) -> bool {
+    pub fn merge(lhs: &mut Seq, rhs: &Seq) -> bool {
         let is_contain_1 = lhs.high() < rhs.high() && lhs.low() > rhs.low();
         let is_contain_2 = lhs.high() > rhs.high() && lhs.low() < rhs.low();
         let is_contain = is_contain_1 || is_contain_2;
@@ -118,10 +89,7 @@ impl Seq {
             return false;
         }
 
-        match direction {
-            MergeDirection::Up => lhs.merge_up(rhs),
-            MergeDirection::Down => lhs.merge_down(rhs),
-        }
+        lhs.merge_up_down(rhs);
 
         true
     }
